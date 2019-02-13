@@ -38,7 +38,7 @@ class MultiBoxLoss(nn.Module):
         self.threshold = cfg.MATCHED_THRESHOLD
         self.unmatched_threshold = cfg.UNMATCHED_THRESHOLD
         self.variance = cfg.VARIANCE
-        self.priors = priors
+        self.priors = Variable(priors)
 
     def forward(self, predictions, targets):
         """Multibox Loss
