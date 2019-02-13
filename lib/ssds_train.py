@@ -42,7 +42,7 @@ class Solver(object):
         # Build model
         print('===> Building model')
         self.model, self.priorbox = create_model(cfg.MODEL)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        self.priors = self.priorbox.forward()
         self.detector = Detect(cfg.POST_PROCESS, self.priors)
 
         # Utilize GPUs for computation
@@ -109,28 +109,6 @@ class Solver(object):
         if 'module.' in list(checkpoint.items())[0][0]:
             pretrained_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint.items())}
             checkpoint = pretrained_dict
-
-        # change the name of the weights which exists in other model
-        # change_dict = {
-        #         'conv1.weight':'base.0.weight',
-        #         'bn1.running_mean':'base.1.running_mean',
-        #         'bn1.running_var':'base.1.running_var',
-        #         'bn1.bias':'base.1.bias',
-        #         'bn1.weight':'base.1.weight',
-        #         }
-        # for k, v in list(checkpoint.items()):
-        #     for _k, _v in list(change_dict.items()):
-        #         if _k == k:
-        #             new_key = k.replace(_k, _v)
-        #             checkpoint[new_key] = checkpoint.pop(k)
-        # change_dict = {'layer1.{:d}.'.format(i):'base.{:d}.'.format(i+4) for i in range(20)}
-        # change_dict.update({'layer2.{:d}.'.format(i):'base.{:d}.'.format(i+7) for i in range(20)})
-        # change_dict.update({'layer3.{:d}.'.format(i):'base.{:d}.'.format(i+11) for i in range(30)})
-        # for k, v in list(checkpoint.items()):
-        #     for _k, _v in list(change_dict.items()):
-        #         if _k in k:
-        #             new_key = k.replace(_k, _v)
-        #             checkpoint[new_key] = checkpoint.pop(k)
 
         resume_scope = self.cfg.TRAIN.RESUME_SCOPE
         # extract the weights based on the resume scope
@@ -391,74 +369,11 @@ class Solver(object):
         sys.stdout.flush()
 
         # log for tensorboard
-        writer.add_scalar('Eval/loc_loss', loc_loss/epoch_size, epoch)
-        writer.add_scalar('Eval/conf_loss', conf_loss/epoch_size, epoch)
+        writer.add_scalar('Eval/loc_loss', loc_loss / epoch_size, epoch)
+        writer.add_scalar('Eval/conf_loss', conf_loss / epoch_size, epoch)
         writer.add_scalar('Eval/mAP', ap, epoch)
         viz_pr_curve(writer, prec, rec, epoch)
         viz_archor_strategy(writer, size, gt_label, epoch)
-
-    # TODO: HOW TO MAKE THE DATALOADER WITHOUT SHUFFLE
-    # def test_epoch(self, model, data_loader, detector, output_dir, use_gpu):
-    #     # sys.stdout.write('\r===> Eval mode\n')
-
-    #     model.eval()
-
-    #     num_images = len(data_loader.dataset)
-    #     num_classes = detector.num_classes
-    #     batch_size = data_loader.batch_size
-    #     all_boxes = [[[] for _ in range(num_images)] for _ in range(num_classes)]
-    #     empty_array = np.transpose(np.array([[],[],[],[],[]]),(1,0))
-
-    #     epoch_size = len(data_loader)
-    #     batch_iterator = iter(data_loader)
-
-    #     _t = Timer()
-
-    #     for iteration in iter(range((epoch_size))):
-    #         images, targets = next(batch_iterator)
-    #         targets = [[anno[0][1], anno[0][0], anno[0][1], anno[0][0]] for anno in targets] # contains the image size
-    #         if use_gpu:
-    #             images = Variable(images.cuda())
-    #         else:
-    #             images = Variable(images)
-
-    #         _t.tic()
-    #         # forward
-    #         out = model(images, is_train=False)
-
-    #         # detect
-    #         detections = detector.forward(out)
-
-    #         time = _t.toc()
-
-    #         # TODO: make it smart:
-    #         for i, (dets, scale) in enumerate(zip(detections, targets)):
-    #             for j in range(1, num_classes):
-    #                 cls_dets = list()
-    #                 for det in dets[j]:
-    #                     if det[0] > 0:
-    #                         d = det.cpu().numpy()
-    #                         score, box = d[0], d[1:]
-    #                         box *= scale
-    #                         box = np.append(box, score)
-    #                         cls_dets.append(box)
-    #                 if len(cls_dets) == 0:
-    #                     cls_dets = empty_array
-    #                 all_boxes[j][iteration*batch_size+i] = np.array(cls_dets)
-
-    #         # log per iter
-    #         log = '\r==>Test: || {iters:d}/{epoch_size:d} in {time:.3f}s [{prograss}]\r'.format(
-    #                 prograss='#'*int(round(10*iteration/epoch_size)) + '-'*int(round(10*(1-iteration/epoch_size))), iters=iteration, epoch_size=epoch_size,
-    #                 time=time)
-    #         sys.stdout.write(log)
-    #         sys.stdout.flush()
-
-    #     # write result to pkl
-    #     with open(os.path.join(output_dir, 'detections.pkl'), 'wb') as f:
-    #         pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
-
-    #     print('Evaluating detections')
-    #     data_loader.dataset.evaluate_detections(all_boxes, output_dir)
 
 
     def test_epoch(self, model, data_loader, detector, output_dir, use_gpu):
