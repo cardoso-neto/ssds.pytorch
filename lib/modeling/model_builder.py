@@ -9,38 +9,39 @@ from lib.modeling.ssds import fssd_lite
 from lib.modeling.ssds import yolo
 
 ssds_map = {
-                'ssd': ssd.build_ssd,
-                'ssd_lite': ssd_lite.build_ssd_lite,
-                'rfb': rfb.build_rfb,
-                'rfb_lite': rfb_lite.build_rfb_lite,
-                'fssd': fssd.build_fssd,
-                'fssd_lite': fssd_lite.build_fssd_lite,
-                'yolo_v2': yolo.build_yolo_v2,
-                'yolo_v3': yolo.build_yolo_v3,
-            }
+    'ssd': ssd.build_ssd,
+    'ssd_lite': ssd_lite.build_ssd_lite,
+    'rfb': rfb.build_rfb,
+    'rfb_lite': rfb_lite.build_rfb_lite,
+    'fssd': fssd.build_fssd,
+    'fssd_lite': fssd_lite.build_fssd_lite,
+    'yolo_v2': yolo.build_yolo_v2,
+    'yolo_v3': yolo.build_yolo_v3,
+}
 
 # nets part
 from lib.modeling.nets import vgg
 from lib.modeling.nets import resnet
 from lib.modeling.nets import mobilenet
 from lib.modeling.nets import darknet
+
 networks_map = {
-                    'vgg16': vgg.vgg16,
-                    'resnet_18': resnet.resnet_18,
-                    'resnet_34': resnet.resnet_34,
-                    'resnet_50': resnet.resnet_50,
-                    'resnet_101': resnet.resnet_101,
-                    'mobilenet_v1': mobilenet.mobilenet_v1,
-                    'mobilenet_v1_075': mobilenet.mobilenet_v1_075,
-                    'mobilenet_v1_050': mobilenet.mobilenet_v1_050,
-                    'mobilenet_v1_025': mobilenet.mobilenet_v1_025,
-                    'mobilenet_v2': mobilenet.mobilenet_v2,
-                    'mobilenet_v2_075': mobilenet.mobilenet_v2_075,
-                    'mobilenet_v2_050': mobilenet.mobilenet_v2_050,
-                    'mobilenet_v2_025': mobilenet.mobilenet_v2_025,
-                    'darknet_19': darknet.darknet_19,
-                    'darknet_53': darknet.darknet_53,
-               }
+    'vgg16': vgg.vgg16,
+    'resnet_18': resnet.resnet_18,
+    'resnet_34': resnet.resnet_34,
+    'resnet_50': resnet.resnet_50,
+    'resnet_101': resnet.resnet_101,
+    'mobilenet_v1': mobilenet.mobilenet_v1,
+    'mobilenet_v1_075': mobilenet.mobilenet_v1_075,
+    'mobilenet_v1_050': mobilenet.mobilenet_v1_050,
+    'mobilenet_v1_025': mobilenet.mobilenet_v1_025,
+    'mobilenet_v2': mobilenet.mobilenet_v2,
+    'mobilenet_v2_075': mobilenet.mobilenet_v2_075,
+    'mobilenet_v2_050': mobilenet.mobilenet_v2_050,
+    'mobilenet_v2_025': mobilenet.mobilenet_v2_025,
+    'darknet_19': darknet.darknet_19,
+    'darknet_53': darknet.darknet_53,
+}
 
 from lib.layers.functions.prior_box import PriorBox
 import torch
@@ -58,7 +59,7 @@ def create_model(cfg):
     '''
     #
     base = networks_map[cfg.NETS]
-    number_box= [2*len(aspect_ratios) if isinstance(aspect_ratios[0], int) else len(aspect_ratios) for aspect_ratios in cfg.ASPECT_RATIOS]  
+    number_box = [2*len(aspect_ratios) if isinstance(aspect_ratios[0], int) else len(aspect_ratios) for aspect_ratios in cfg.ASPECT_RATIOS]
         
     model = ssds_map[cfg.SSDS](base=base, feature_layer=cfg.FEATURE_LAYER, mbox=number_box, num_classes=cfg.NUM_CLASSES)
     #
