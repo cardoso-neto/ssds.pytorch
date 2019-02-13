@@ -1,18 +1,19 @@
-import os
-import pickle
-import os.path
-import sys
-import torch
-import torch.utils.data as data
-import torchvision.transforms as transforms
-import cv2
-import numpy as np
 import json
+import os
+import os.path
+import pickle
+import sys
 import uuid
 
-from lib.utils.pycocotools.coco import COCO
-from lib.utils.pycocotools.cocoeval import COCOeval
-from lib.utils.pycocotools import mask as COCOmask
+import numpy as np
+import torch
+import torchvision.transforms as transforms
+from torch.utils import data
+
+import cv2
+from pycocotools import mask as COCOmask
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
 
 
 class COCODetection(data.Dataset):
